@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>매장 페이지</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+<h1>매장: 요청 리스트</h1>
+<ul id="requestList"></ul>
+
+<script>
+    const API_BASE = "http://localhost:8080/api/matching";
+    const STORE_ID = 1;
+    let stompClient = null;
+
+    function connectWebSocket() {
+        const socket = new SockJS("http://localhost:8080/ws");
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, () => {
+            stompClient.subscribe(`/topic/stores/${STORE_ID}/requests`, (message) => {
+                const data = JSON.parse(message.body);
+                addRequest(data);
+            });
+        });
+    }
+
+    function addRequest(req) {
+        const listEl = document.getElementById("requestList");
+        const li = document.createElement("li");
+        li.textContent = `요청 ${req.id} | 사용자 ${req.userId} | 설명: ${req.description}`;
+
+        const btn = document.createElement("button");
+        btn.textContent = "수락하기";
+        btn.onclick = () => acceptRequest(req.id);
+
+        li.appendChild(btn);
+        listEl.appendChild(li);
+    }
+
+    async function acceptRequest(reqId) {
+        const body = { store_id: STORE_ID };
+        const res = await fetch(`${API_BASE}/requests/${reqId}/accept`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        alert(`요청 ${data.id} 매칭 완료!`);
+    }
+
+    connectWebSocket();
+</script>
+</body>
+</html>

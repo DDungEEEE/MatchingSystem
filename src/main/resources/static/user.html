@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>사용자 페이지</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+<h1>사용자: 수리 요청</h1>
+<button onclick="createRequest()">수리 요청 보내기</button>
+<p id="status"></p>
+
+<script>
+    const API_BASE = "http://localhost:8080/api/matching";
+    let stompClient = null;
+    const USER_ID = 1;
+
+    // WebSocket 연결
+    function connectWebSocket() {
+        const socket = new SockJS("http://localhost:8080/ws");
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, () => {
+            stompClient.subscribe(`/topic/users/${USER_ID}/matched`, (message) => {
+                const data = JSON.parse(message.body);
+                document.getElementById("status").innerText =
+                    `매장 [${data.matchedStoreName}]와 매칭되었습니다!`;
+            });
+        });
+    }
+
+    async function createRequest() {
+        const body = {
+            user_id: USER_ID,
+            latitude: 37.5665,
+            longitude: 126.9780,
+            description: "노트북 수리 요청",
+            radius_km: 10
+        };
+
+        const res = await fetch(`${API_BASE}/requests`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+        });
+
+        const data = await res.json();
+        document.getElementById("status").innerText = "대기 중...";
+    }
+
+    connectWebSocket();
+</script>
+</body>
+</html>
