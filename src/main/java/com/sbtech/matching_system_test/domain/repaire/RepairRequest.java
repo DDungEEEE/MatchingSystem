@@ -1,5 +1,7 @@
-package com.sbtech.matching_system_test.domain;
+package com.sbtech.matching_system_test.domain.repaire;
 
+import com.sbtech.matching_system_test.domain.store.UserAccount;
+import com.sbtech.matching_system_test.domain.store.Store;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

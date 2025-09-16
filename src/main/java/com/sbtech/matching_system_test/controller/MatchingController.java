@@ -1,6 +1,6 @@
 package com.sbtech.matching_system_test.controller;
 
-import com.sbtech.matching_system_test.domain.Store;
+import com.sbtech.matching_system_test.domain.store.Store;
 import com.sbtech.matching_system_test.dto.AcceptRequestDto;
 import com.sbtech.matching_system_test.dto.CreateRequestDto;
 import com.sbtech.matching_system_test.dto.RepairRequestResultDto;
@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -20,7 +21,7 @@ public class MatchingController {
 
     // 1) 사용자 수리요청 생성
     @PostMapping("/requests")
-    public RepairRequestResultDto createRequest(@Valid @RequestBody CreateRequestDto dto) {
+    public RepairRequestResultDto createRequest(@Valid @RequestBody CreateRequestDto dto) throws IOException {
         return matchingService.createRequest(dto);
     }
 

@@ -1,4 +1,4 @@
-package com.sbtech.matching_system_test.domain;
+package com.sbtech.matching_system_test.domain.store;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,9 +24,19 @@ public class Store {
     @Column(length = 20, nullable = false, unique = true)
     private String phone;
 
+    @Column(name = "login_id", nullable = false, unique = true)
+    private String loginId;
+
+    @Column(nullable = false)
+    private String password;
+
+    @Column(nullable = false)
+    private String address;
+
     // 위도/경도 (WGS84)
     @Column(nullable = false)
     private Double latitude;   // 예: 37.5665
+
     @Column(nullable = false)
     private Double longitude;  // 예: 126.9780
 

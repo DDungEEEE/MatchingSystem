@@ -8,7 +8,11 @@
 </head>
 <body>
 <h1>사용자: 수리 요청</h1>
+
+<!-- 주소 입력 -->
+<input type="text" id="address" placeholder="주소를 입력하세요" style="width:300px;">
 <button onclick="createRequest()">수리 요청 보내기</button>
+
 <p id="status"></p>
 
 <script>
@@ -31,10 +35,16 @@
     }
 
     async function createRequest() {
+        const address = document.getElementById("address").value;
+
+        if (!address) {
+            alert("주소를 입력해주세요.");
+            return;
+        }
+
         const body = {
             user_id: USER_ID,
-            latitude: 37.5665,
-            longitude: 126.9780,
+            address: address, // 사용자 입력 주소
             description: "노트북 수리 요청",
             radius_km: 10
         };
@@ -44,6 +54,11 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body)
         });
+
+        if (!res.ok) {
+            document.getElementById("status").innerText = "요청 실패!";
+            return;
+        }
 
         const data = await res.json();
         document.getElementById("status").innerText = "대기 중...";

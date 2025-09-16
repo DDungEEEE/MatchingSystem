@@ -1,7 +1,7 @@
 package com.sbtech.matching_system_test.dto;
 
-import com.sbtech.matching_system_test.domain.RepairRequest;
-import com.sbtech.matching_system_test.domain.RequestStatus;
+import com.sbtech.matching_system_test.domain.repaire.RepairRequest;
+import com.sbtech.matching_system_test.domain.repaire.RequestStatus;
 
 public record RepairRequestResultDto(
         Long id,

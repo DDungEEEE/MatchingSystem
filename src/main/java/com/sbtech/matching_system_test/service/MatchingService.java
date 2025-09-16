@@ -1,19 +1,36 @@
 package com.sbtech.matching_system_test.service;
 
-import com.sbtech.matching_system_test.domain.*;
+import com.sbtech.matching_system_test.domain.repaire.RepairRequest;
+import com.sbtech.matching_system_test.domain.repaire.RequestStatus;
+import com.sbtech.matching_system_test.domain.store.Store;
+import com.sbtech.matching_system_test.domain.store.UserAccount;
 import com.sbtech.matching_system_test.dto.CreateRequestDto;
 import com.sbtech.matching_system_test.dto.RepairRequestResultDto;
 import com.sbtech.matching_system_test.repository.RepairRequestRepository;
 import com.sbtech.matching_system_test.repository.StoreRepository;
 import com.sbtech.matching_system_test.repository.UserAccountRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class MatchingService {
 
@@ -21,17 +38,24 @@ public class MatchingService {
     private final UserAccountRepository userRepo;
     private final StoreRepository storeRepo;
     private final RepairRequestRepository requestRepo;
+    private final GeoCodingService geoCodingService;
+
 
     /** 1) 요청 생성 + 반경 내 매장들에게 실시간 알림 */
     @Transactional
-    public RepairRequestResultDto createRequest(CreateRequestDto dto) {
+    public RepairRequestResultDto createRequest(CreateRequestDto dto) throws IOException {
         UserAccount user = userRepo.findById(dto.userId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
+
+        Map<String, Double> locationMap = geoCodingService.getLocationByAd(dto.address());
+
+        System.out.println("-------------------------" + locationMap.get("lat"));
+        System.out.println("-------------------------" + locationMap.get("lng"));
         RepairRequest req = RepairRequest.builder()
                 .user(user)
-                .latitude(dto.latitude())
-                .longitude(dto.longitude())
+                .latitude(locationMap.get("lat"))
+                .longitude(locationMap.get("lng"))
                 .description(dto.description())
                 .status(RequestStatus.PENDING)
                 .build();
@@ -42,7 +66,7 @@ public class MatchingService {
 
         // 반경 내 매장 찾기
         List<Store> nearby = storeRepo.findAll().stream()
-                .filter(s -> distanceKm(dto.latitude(), dto.longitude(),
+                .filter(s -> distanceKm(locationMap.get("lat"), locationMap.get("lng"),
                         s.getLatitude(), s.getLongitude()) <= radiusKm)
                 .toList();
 
@@ -135,4 +159,6 @@ public class MatchingService {
                 * Math.sin(dLon / 2) * Math.sin(dLon / 2);
         return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
+
+
 }
