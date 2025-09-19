@@ -31,7 +31,7 @@ public class LoginService {
             if (!passwordEncoder.matches(password, user.getPassword())) {
                 throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
             }
-            String accessToken = jwtProvider.generateAccessToken(user.getLoginId());
+            String accessToken = jwtProvider.generateAccessToken(user.getLoginId(), user.getId(), "USER");
             String refreshToken = jwtProvider.generateRefreshToken(user.getLoginId());
             return new LoginResponse(accessToken, refreshToken, "USER");
         }
@@ -43,7 +43,7 @@ public class LoginService {
             if (!passwordEncoder.matches(password, store.getPassword())) {
                 throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
             }
-            String accessToken = jwtProvider.generateAccessToken(store.getLoginId());
+            String accessToken = jwtProvider.generateAccessToken(store.getLoginId(), store.getId(), "STORE");
             String refreshToken = jwtProvider.generateRefreshToken(store.getLoginId());
             return new LoginResponse(accessToken, refreshToken, "STORE");
         }

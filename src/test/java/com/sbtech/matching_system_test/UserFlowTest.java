@@ -12,7 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.springframework.mock.http.server.reactive.MockServerHttpRequest.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -29,6 +29,7 @@ public class UserFlowTest {
     void 사용자_회원가입_로그인_수리요청() throws Exception {
         // 1. 회원가입
         var signUp = new UserSignUpRequest("홍길동", "user100", "1234", "010-5555-5555");
+
         mockMvc.perform(post("/api/signup/user")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(signUp)))
@@ -36,6 +37,7 @@ public class UserFlowTest {
 
         // 2. 로그인
         var login = new LoginRequest("user100", "1234");
+
         String loginResponse = mockMvc.perform(post("/api/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login)))

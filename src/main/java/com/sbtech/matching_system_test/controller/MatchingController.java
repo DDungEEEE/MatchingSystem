@@ -25,16 +25,16 @@ public class MatchingController {
         return matchingService.createRequest(dto);
     }
 
-    // 2) (선택) 반경 내 후보 매장 조회 (디버그/테스트용)
-    @GetMapping("/stores/nearby")
-    public List<Store> findNearbyStores(@RequestParam double lat,
-                                        @RequestParam double lng,
-                                        @RequestParam(defaultValue = "10") double radiusKm,
-                                        @RequestParam(defaultValue = "50") int limit) {
-        return matchingService.findNearbyStores(lat, lng, radiusKm, limit);
-    }
+//    // 2) (선택) 반경 내 후보 매장 조회 (디버그/테스트용)
+//    @GetMapping("/stores/nearby")
+//    public List<Store> findNearbyStores(@RequestParam double lat,
+//                                        @RequestParam double lng,
+//                                        @RequestParam(defaultValue = "10") double radiusKm,
+//                                        @RequestParam(defaultValue = "50") int limit) {
+//        return matchingService.findNearbyStores(lat, lng, radiusKm, limit);
+//    }
 
-    // 3) 매장 측 수락
+    // 3) 매장 : 요청 수락
     @PostMapping("/requests/{requestId}/accept")
     public RepairRequestResultDto acceptRequest(@PathVariable Long requestId,
                                                 @Valid @RequestBody AcceptRequestDto dto) {

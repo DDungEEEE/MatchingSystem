@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>로그인</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin:0; padding:40px; background:#f7f7fb; }
+        .card { max-width:420px; margin:0 auto; background:#fff; border-radius:16px; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,.08); }
+        h1 { margin:0 0 16px; font-size:22px; }
+        label { display:block; margin:12px 0 6px; font-size:14px; color:#333; }
+        input { width:100%; padding:12px; border-radius:10px; border:1px solid #ddd; outline:none; }
+        input:focus { border-color:#8aa9ff; }
+        button { width:100%; margin-top:16px; padding:12px; border:0; border-radius:10px; background:#4f6cff; color:#fff; font-weight:600; cursor:pointer; }
+        button:disabled { opacity:.6; cursor:not-allowed; }
+        .error { color:#c62828; margin-top:10px; font-size:13px; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>매칭 시스템 로그인</h1>
+
+    <label for="loginId">아이디</label>
+    <input id="loginId" placeholder="예) user100 또는 store100" value="user100" />
+
+    <label for="password">비밀번호</label>
+    <input id="password" type="password" placeholder="비밀번호" value="1234" />
+
+    <button id="loginBtn" onclick="login()">로그인</button>
+
+    <div id="error" class="error" style="display:none"></div>
+</div>
+
+<script>
+    const API = location.origin;
+
+    function b64UrlDecode(str){
+        str = str.replace(/-/g, '+').replace(/_/g, '/');
+        const pad = str.length % 4 ? 4 - (str.length % 4) : 0;
+        str += '='.repeat(pad);
+        return atob(str);
+    }
+    function parseJwt(token){
+        try {
+            return JSON.parse(b64UrlDecode(token.split('.')[1]));
+        } catch(e) {
+            return {};
+        }
+    }
+
+    async function login(){
+        const loginId = document.getElementById('loginId').value.trim();
+        const password = document.getElementById('password').value;
+        const btn = document.getElementById('loginBtn');
+        const errorEl = document.getElementById('error');
+        errorEl.style.display = 'none';
+        btn.disabled = true;
+
+        try {
+            const res = await fetch(API + "/api/login", {
+                method: "POST",
+                headers: { "Content-Type":"application/json" },
+                body: JSON.stringify({ loginId, password })
+            });
+
+            if(!res.ok){
+                throw new Error("로그인 실패: " + res.status);
+            }
+
+            const data = await res.json(); // { accessToken, refreshToken }
+            const token = data.accessToken;
+            if(!token) throw new Error("응답에 accessToken 없음");
+
+            const claims = parseJwt(token);
+            const id = claims.id;
+            const role = claims.role;
+
+            if(!id || !role) throw new Error("JWT에 id/role 없음");
+
+            // 로컬스토리지 저장
+            localStorage.setItem("ACCESS_TOKEN", token);
+            localStorage.setItem("ROLE", role);
+            if(role === "USER") localStorage.setItem("USER_ID", id);
+            if(role === "STORE") localStorage.setItem("STORE_ID", id);
+
+            // 리다이렉트
+            if(role === "USER") location.href = "/user.html";
+            else if(role === "STORE") location.href = "/store.html";
+
+        } catch(e){
+            errorEl.textContent = e.message;
+            errorEl.style.display = 'block';
+        } finally {
+            btn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>

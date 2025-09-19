@@ -15,9 +15,11 @@ public class JwtProvider {
     private final long accessTokenValidity = 1000 * 60 * 30;   // 30분
     private final long refreshTokenValidity = 1000L * 60 * 60 * 24 * 7; // 7일
 
-    public String generateAccessToken(String loginId) {
+    public String generateAccessToken(String loginId, Long userId, String role) {
         return Jwts.builder()
                 .setSubject(loginId)
+                .claim("id", userId)
+                .claim("role", role)
                 .setExpiration(new Date(System.currentTimeMillis() + accessTokenValidity))
                 .signWith(key)
                 .compact();
